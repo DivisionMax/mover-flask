@@ -11,8 +11,9 @@ def main():
 def getApi():
     id = request.args.get('id')     #GET - request.args - URL parameters
     msg = request.args.get('message')
-    print("Parmeters received %s, %s  " % (id, msg))
-    #return jsonify(msg)
+    response = "Parmeters received %s, %s  " % (id, msg)
+    print(response)
+    return (response)
 
 @app.route('/post-api', methods=['POST']) #data is submitted
 def postApi():
