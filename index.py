@@ -10,8 +10,8 @@ import mysql.connector
 from mysql.connector import Error
 
 app = Flask(__name__)
-# DATABASE CONFIGURATION
 
+# DATABASE CONFIGURATION
 """ Connect to MySQL database """
 conn = None
 
@@ -51,7 +51,6 @@ def login():
             cursor.execute("SELECT * FROM user WHERE user_email = %s", (_email,))
             # cursor.execute("SELECT * FROM users WHERE email = %s AND password = %s", (_email, _password))
             result = cursor.fetchone()
-
             if result is not None:
                 # jsonify returns a response
                 result = jsonify({'id': result[0]})
@@ -59,7 +58,6 @@ def login():
                 return result, 200
             else:
                 return 'Unsuccessful login, check inputs', 200
-
         else:
             return 'Email and password must be submitted', 500
         cursor.close()
@@ -81,8 +79,6 @@ def register():
         print ("The data was malformed")
         app.logger.warn('The data was malformed')
         return 'The data was malformed', 500
-    #return jsonify(msg)
-
 
 if __name__ == "__main__":
     #app.run() #local
