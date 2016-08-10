@@ -31,14 +31,6 @@ def main():
     app.logger.debug('Requested')
     return render_template('index.html')
 
-@app.route('/get-api', methods=['GET']) #get a resource
-def getApi():
-    id = request.args.get('id')     #GET - request.args - URL parameters
-    msg = request.args.get('message')
-    response = "Parmeters received %s, %s  " % (id, msg)
-    app.logger.info(response)
-    return response, 200
-
 @app.route('/login', methods=['POST']) #data is submitted
 def login():
     try:
@@ -66,6 +58,7 @@ def login():
         app.logger.warn('The data was malformed')
         return 'Email and password must be submitted', 500
 
+# doesn't interact with the database yet.
 @app.route('/register', methods=['POST']) #data is submitted
 def register():
     try:
@@ -79,6 +72,45 @@ def register():
         print ("The data was malformed")
         app.logger.warn('The data was malformed')
         return 'The data was malformed', 500
+
+
+@app.route('/post-accident', methods=['POST']) #data is submitted
+def postAccident():
+    try:
+        _userId = request.form['userId'] #POST - request.args - URL parameters
+        _longitude = request.form['longitude']
+        _latitude = request.form['latitude']
+        _time = request.form['time']
+
+        # validate the received values
+        if _userId and _longitude and _latitude and _time:
+        
+            # parametize, security
+            # cursor = conn.cursor()
+            # # cursor.execute("INSERT INTO ACCIDENTS() VALUES(%s, %s, %s, %s)", (_userId, _longitude, _latitude, _time)) #last value is a timestamp
+            
+            # conn.commit()
+
+            # if cursor.lastrowid:
+            #     response = "Accident received and inserted"
+            #     app.logger.info(response)
+            #     return jsonify({"msg":response},200)
+            # else:
+            #     response = "Accident could not be inserted"
+            #     app.logger.warn(response)
+            #     return jsonify({"msg":response},500)
+            return jsonify({"msg":"well done"},500)
+
+        else:
+            return 'Invalid accident information', 500
+
+        # cursor.close()
+    except KeyError:
+        app.logger.warn('Invalid accident information')
+        response = "Accident could not be inserted"
+        app.logger.warn(response)
+        return jsonify({"msg":response},500)
+
 
 if __name__ == "__main__":
     #app.run() #local
