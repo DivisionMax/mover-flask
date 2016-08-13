@@ -26,7 +26,6 @@ try:
 except Error as e:
     print(e)
 
-
 @app.errorhandler(404)
 def page_not_found(e):
     return jsonify({"error":"page doesn't exist"}, 404)
@@ -34,12 +33,6 @@ def page_not_found(e):
 @app.errorhandler(500)
 def page_not_found(e):
     return jsonify({"error":"i broke"}, 500)
-
-
-@app.route('/')
-def main():
-    app.logger.debug('Requested')
-    return render_template('index.html')
 
 @app.route('/login', methods=['POST']) #data is submitted
 def login():
@@ -93,44 +86,6 @@ def register():
     except KeyError:
         app.logger.warn('invalid inputs')
         return jsonify({"error":"invalid inputs"})
-
-
-@app.route('/post-accident', methods=['POST']) #data is submitted
-def postAccident():
-    try:
-        _userId = request.form['userId'] #POST - request.args - URL parameters
-        _longitude = request.form['longitude']
-        _latitude = request.form['latitude']
-
-        # server doesn't create the time because incident may not have occured at this time
-        _time = request.form['time']
-
-        # validate the received values
-        if _userId and _longitude and _latitude and _time:
-        
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO ACCIDENTS() VALUES(%s, %s, %s, %s)", (_userId, _longitude, _latitude, _time)) #last value is a timestamp          
-            conn.commit()
-            if cursor.lastrowid:
-                response = "Accident received and inserted"
-                app.logger.info(response)
-                return jsonify({"msg":response},200)
-            else:
-                response = "Accident could not be inserted"
-                app.logger.warn(response)
-                return jsonify({"msg":response},500)
-            return jsonify({"msg":"well done"},500)
-
-        else:
-            return 'Invalid accident information', 500
-
-        # cursor.close()
-    except KeyError:
-        app.logger.warn('Invalid accident information')
-        response = "Accident could not be inserted"
-        app.logger.warn(response)
-        return jsonify({"msg":response},500)
-
 
 if __name__ == "__main__":
     #app.run() #local
