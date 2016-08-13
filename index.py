@@ -26,6 +26,16 @@ try:
 except Error as e:
     print(e)
 
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return jsonify({"error":"page doesn't exist"}, 404)
+
+@app.errorhandler(500)
+def page_not_found(e):
+    return jsonify({"error":"i broke"}, 500)
+
+
 @app.route('/')
 def main():
     app.logger.debug('Requested')
@@ -68,21 +78,18 @@ def register():
         _password = request.form['password']
         _passwordConfirm = request.form['password_confirm']
         
-        if _email and _password and _passwordConfirm:
-            if _password == _passwordConfirm:
-                cursor = conn.cursor()
-                # stored passwords must be hashed
-                password_hash = hash_password(password)
-                cursor.execute("INSERT INTO web_app_users (emailAddress,password,password_hash) values (%s,%s)", (_email,_password_hash))
-                db.commit()
-
-            return 'Registration details receieved', 200
+        if _password == _passwordConfirm:
+            cursor = conn.cursor()
+            # stored passwords must be hashed
+            password_hash = hash_password(_password)
+            cursor.execute("INSERT INTO web_app_users (emailAddress,password,password_hash) values (%s,%s)", (_email,password_hash))
+            db.commit()
+            return jsonify({"success":"registration confirmed"})
         else:
-            return 'Email and password must be submitted', 500
+            return jsonify({"error":"passwords do not match"})
     except KeyError:
-        print ("The data was malformed")
-        app.logger.warn('The data was malformed')
-        return 'The data was malformed', 500
+        app.logger.warn('invalid inputs')
+        return jsonify({"error":"invalid inputs"})
 
 
 @app.route('/post-accident', methods=['POST']) #data is submitted
