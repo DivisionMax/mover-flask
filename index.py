@@ -49,26 +49,29 @@ def login():
         # validate the received values
         if _email and _password:
 
-            # only hashed passwords are stored
-            passwordHash = hash_password(_password)
             cursor = conn.cursor()
             # parametized - prevent SQL injection
-            cursor.execute("SELECT * FROM web_app_users WHERE emailAddress = %s and password = %s", (_email,passwordHash))
+            cursor.execute("SELECT password FROM web_app_users WHERE emailAddress = %s", (_email,))
+            
             result = cursor.fetchone()
+            app.logger.info(result)
             if result is not None:
                 # jsonify returns a response
-                result = jsonify({'id': result[0]})
-                print (result)
-                return result, 200
+                if check_password(result[0],_password):
+                    result = jsonify({"success":"login successful"})
+                else:
+                    result = jsonify({"error":"login unsuccessful"})
+                return result
             else:
-                return 'Unsuccessful login, check inputs', 200
+                return jsonify({"error":"login unsuccessful"})
+
         else:
-            return 'Email and password must be submitted', 500
+            return jsonify({"error":"parameters cannot be empty"})
         cursor.close()
     except KeyError:
-        print ("The data was malformed")
         app.logger.warn('The data was malformed')
-        return 'Email and password must be submitted', 500
+        return jsonify({"error":"parameters cannot be empty"})
+
 
 # doesn't interact with the database yet.
 @app.route('/register', methods=['POST']) #data is submitted
@@ -82,8 +85,8 @@ def register():
             cursor = conn.cursor()
             # stored passwords must be hashed
             password_hash = hash_password(_password)
-            cursor.execute("INSERT INTO web_app_users (emailAddress,password,password_hash) values (%s,%s)", (_email,password_hash))
-            db.commit()
+            cursor.execute("INSERT INTO web_app_users (emailAddress,password) values (%s,%s)", (_email,password_hash))
+            conn.commit()
             return jsonify({"success":"registration confirmed"})
         else:
             return jsonify({"error":"passwords do not match"})
