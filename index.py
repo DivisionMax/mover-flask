@@ -66,7 +66,31 @@ def login():
         return jsonify({"error":"parameters cannot be empty"})
 
 
-# doesn't interact with the database yet.
+@app.route('/car-accident', methods=['POST']) #data is submitted
+def register():
+    try:        
+        _email = request.form['email'] 
+        _lat = request.form['lat']
+        _long = request.form['lng']
+        _acc = request.form['acc']
+        
+        _time = datetime.datetime.utcnow()
+
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT userID FROM web_app_users WHERE emailAddress = %s", (_email,))
+            
+        _userID = result = cursor.fetchone()
+        
+        app.logger.info(result)
+        
+        cursor.execute("INSERT INTO car_accidents (accidentTime,latitude,longitude,acceleration,mobile_app_users_userID) values (%s,%s,%s,%s,%s)", (_time, _lat, _long, _acc, _email,_userID))
+        conn.commit()
+        return jsonify({"success":"accident posted"})
+    except KeyError:
+        app.logger.warn('accident post failed')
+        return jsonify({"error":"accident post failed"})
+
 @app.route('/register', methods=['POST']) #data is submitted
 def register():
     try:
