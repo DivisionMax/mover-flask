@@ -70,7 +70,10 @@ def login():
 @app.route('/register', methods=['POST']) #data is submitted
 def register():
     try:
-        _email = request.form['email'] #POST - request.args - URL parameters
+        _name = request.form['name'] #POST - request.args - URL parameters
+        _surname = request.form['surname']
+        _userName = request.form['name']
+        _email = request.form['email'] 
         _password = request.form['password']
         _passwordConfirm = request.form['password_confirm']
         
@@ -78,7 +81,7 @@ def register():
             cursor = conn.cursor()
             # stored passwords must be hashed
             password_hash = hash_password(_password)
-            cursor.execute("INSERT INTO web_app_users (emailAddress,password) values (%s,%s)", (_email,password_hash))
+            cursor.execute("INSERT INTO web_app_users (firstName,lastName,userName,emailAddress,password) values (%s,%s,%s,%s,%s)", (_name, _surname, _userName, _email,password_hash))
             conn.commit()
             return jsonify({"success":"registration confirmed"})
         else:
