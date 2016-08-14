@@ -67,7 +67,7 @@ def login():
 
 
 @app.route('/car-accident', methods=['POST']) #data is submitted
-def register():
+def car-accident():
     try:        
         _email = request.form['email'] 
         _lat = request.form['lat']
