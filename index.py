@@ -85,9 +85,9 @@ def carAccident():
         cursor.execute("INSERT INTO simpleRunningAccidents (accidentTime,location,mobileAppUserId) values (GETDATE(),POINT(%s,%s),%s)", (_lat, _long, _userID))
         conn.commit()
         return jsonify({"success":"accident posted"})
-    except KeyError:
+    except Exception,e:
         app.logger.warn('accident post failed')
-        return jsonify({"error":"accident post failed"})
+        return jsonify({"error":"accident post failed"},str(e))
 
 @app.route('/register', methods=['POST']) #data is submitted
 def register():
