@@ -44,7 +44,7 @@ def login():
 
             cursor = conn.cursor()
             # parametized - prevent SQL injection
-            cursor.execute("SELECT password FROM web_app_users WHERE emailAddress = %s", (_email,))
+            cursor.execute("SELECT password FROM mobile_app_users WHERE emailAddress = %s", (_email,))
             
             result = cursor.fetchone()
             app.logger.info(result)
@@ -70,10 +70,9 @@ def login():
 @app.route('/register', methods=['POST']) #data is submitted
 def register():
     try:
-        _name = request.form['name'] #POST - request.args - URL parameters
-        _surname = request.form['surname']
-        _userName = request.form['email']
+        #POST - request.args - URL parameters
         _email = request.form['email'] 
+        _username = _email.rsplit('@', 1)[0]
         _password = request.form['password']
         _passwordConfirm = request.form['password_confirm']
         
@@ -81,7 +80,7 @@ def register():
             cursor = conn.cursor()
             # stored passwords must be hashed
             password_hash = hash_password(_password)
-            cursor.execute("INSERT INTO web_app_users (firstName,lastName,userName,emailAddress,password) values (%s,%s,%s,%s,%s)", (_name, _surname, _userName, _email,password_hash))
+            cursor.execute("INSERT INTO mobile_app_users (emailAddress,password,username) values (%s,%s,%s,%s,%s)", (_email,password_hash, _username))
             conn.commit()
             return jsonify({"success":"registration confirmed"})
         else:
