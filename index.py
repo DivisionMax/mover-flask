@@ -66,7 +66,7 @@ def login():
         return jsonify({"error":"parameters cannot be empty"})
 
 
-@app.route('/car-accident', methods=['POST']) #data is submitted
+@app.route('/car_accident', methods=['POST']) #data is submitted
 def carAccident():
     try:        
         _email = request.form['email'] 
