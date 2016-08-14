@@ -72,7 +72,7 @@ def register():
     try:
         _name = request.form['name'] #POST - request.args - URL parameters
         _surname = request.form['surname']
-        _userName = request.form['name']
+        _userName = request.form['email']
         _email = request.form['email'] 
         _password = request.form['password']
         _passwordConfirm = request.form['password_confirm']
