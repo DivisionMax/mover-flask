@@ -72,9 +72,7 @@ def carAccident():
         _email = request.form['email'] 
         _lat = request.form['lat']
         _long = request.form['lng']
-        _acc = request.form['acc']
-        
-        _time = datetime.datetime.utcnow()
+        _acc = request.form['acc']       
 
         cursor = conn.cursor()
 
@@ -84,7 +82,7 @@ def carAccident():
         
         app.logger.info(result)
         
-        cursor.execute("INSERT INTO simpleRunningAccidents (accidentTime,location,mobileAppUserId) values (%s,POINT(%s,%s),%s)", (_time, _lat, _long, _userID))
+        cursor.execute("INSERT INTO simpleRunningAccidents (accidentTime,location,mobileAppUserId) values (GETDATE(),POINT(%s,%s),%s)", (_lat, _long, _userID))
         conn.commit()
         return jsonify({"success":"accident posted"})
     except KeyError:
