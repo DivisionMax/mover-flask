@@ -5,6 +5,7 @@ import sys, traceback
 from flask import Flask, render_template, request
 from flask import jsonify
 from password_service import hash_password, check_password
+from datetime import datetime
 # MySQL connectivity
 import mysql.connector
 from mysql.connector import Error
@@ -44,30 +45,59 @@ def login():
 
             cursor = conn.cursor()
             # parametized - prevent SQL injection
-            cursor.execute("SELECT password FROM mobile_app_users WHERE emailAddress = %s", (_email,))
+            cursor.execute("SELECT * FROM mobile_app_users WHERE emailAddress = %s", (_email,))
             
             result = cursor.fetchone()
+
             app.logger.info(result)
-            if result is not None:
+            
+            if result:
                 # jsonify returns a response
-                if check_password(result[0],_password):
-                    result = jsonify({"success":"login successful"})
+                if check_password(result[2],_password):
+                    response = jsonify({"success":"login successful","username": result[3],"id": result[0]})
                 else:
-                    result = jsonify({"error":"login unsuccessful"})
-                return result
+                    response = jsonify({"error":"login unsuccessful"})
             else:
-                return jsonify({"error":"login unsuccessful"})
+                response = jsonify({"error":"login unsuccessful"})
+
 
         else:
-            return jsonify({"error":"parameters cannot be empty"})
+            response = jsonify({"error":"parameters cannot be empty"})
+            
+        return response
+
         cursor.close()
     except KeyError:
         app.logger.warn('The data was malformed')
         return jsonify({"error":"parameters cannot be empty"})
 
+@app.route('/register', methods=['POST']) #data is submitted
+def register():
+    try:
+        #POST - request.args - URL parameters
+        _email = request.form['email'] 
+        username = _email.rsplit('@', 1)[0]
+        _password = request.form['password']
+        _passwordConfirm = request.form['password_confirm']
+        
+        if _password == _passwordConfirm:
+            cursor = conn.cursor()
+            # stored passwords must be hashed
+            password_hash = hash_password(_password)
+            cursor.execute("INSERT INTO mobile_app_users (emailAddress,password,username) values (%s,%s,%s)", (_email, password_hash, username))
+            conn.commit()
+            id = cursor.lastrowid
+            if id:
+                return jsonify({"success":"registration confirmed","username": username, "id": id})
+        else:
+            return jsonify({"error":"passwords do not match"})
+    except KeyError:
+        app.logger.warn('invalid inputs')
+        return jsonify({"error":"invalid inputs"})
 
-@app.route('/car_accident', methods=['POST']) #data is submitted
-def carAccident():
+
+@app.route('/car-accident', methods=['POST']) #data is submitted
+def caraccident():
     try:        
         _email = request.form['email'] 
         _lat = request.form['lat']
@@ -91,24 +121,32 @@ def carAccident():
         app.logger.warn('accident post failed')
         return jsonify({"error":"accident post failed"})
 
-@app.route('/register', methods=['POST']) #data is submitted
-def register():
+
+@app.route('/accident', methods=['POST']) #data is submitted
+def accident():
     try:
         #POST - request.args - URL parameters
-        _email = request.form['email'] 
-        _username = _email.rsplit('@', 1)[0]
-        _password = request.form['password']
-        _passwordConfirm = request.form['password_confirm']
+        _type = request.form['type']
+        _longitude = request.form['longitude']
+        _latitude = request.form['latitude']
+        _timeOfAccident = request.form['time-of-accident']
+        _userId = request.form['userId']
+        app.logger.info('Time of Accident: %s', (_timeOfAccident,))
         
-        if _password == _passwordConfirm:
-            cursor = conn.cursor()
-            # stored passwords must be hashed
-            password_hash = hash_password(_password)
-            cursor.execute("INSERT INTO mobile_app_users (emailAddress,password,username) values (%s,%s,%s)", (_email, password_hash, _username))
-            conn.commit()
-            return jsonify({"success":"registration confirmed"})
+        if _type and _longitude and _latitude and _timeOfAccident and _userId:
+            # date_object = datetime.strptime(_timeOfAccident, '%b %d %Y %I:%M%p')
+
+            if _type == 'runner':
+                # runner accident
+                cursor = conn.cursor()
+                # stored passwords must be hashed
+                cursor.execute("INSERT INTO simplerunningaccidents (accidentTime,location,mobileAppUserId) values (%s,point(%s,%s),%s)", (_timeOfAccident, _longitude,_latitude, _userId))
+                conn.commit()
+                return jsonify({"success":"accident added"})
+            else:
+                return jsonify({"error":"no accident added"})
         else:
-            return jsonify({"error":"passwords do not match"})
+            return jsonify({"error":"invalid inputs"})
     except KeyError:
         app.logger.warn('invalid inputs')
         return jsonify({"error":"invalid inputs"})
