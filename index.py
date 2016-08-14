@@ -84,7 +84,7 @@ def carAccident():
         
         app.logger.info(result)
         
-        cursor.execute("INSERT INTO car_accidents (accidentTime,latitude,longitude,acceleration,mobile_app_users_userID) values (%s,%s,%s,%s,%s)", (_time, _lat, _long, _acc, _email,_userID))
+        cursor.execute("INSERT INTO simpleRunningAccidents (accidentTime,location,mobileAppUserId) values (%s,POINT(%s,%s),%s)", (_time, _lat, _long, _userID))
         conn.commit()
         return jsonify({"success":"accident posted"})
     except KeyError:
