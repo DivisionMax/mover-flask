@@ -80,7 +80,7 @@ def register():
             cursor = conn.cursor()
             # stored passwords must be hashed
             password_hash = hash_password(_password)
-            cursor.execute("INSERT INTO mobile_app_users (emailAddress,password,username) values (%s,%s,%s,%s,%s)", (_email,password_hash, _username))
+            cursor.execute("INSERT INTO mobile_app_users (emailAddress,password,username) values (%s,%s,%s)", (_email, password_hash, _username))
             conn.commit()
             return jsonify({"success":"registration confirmed"})
         else:
