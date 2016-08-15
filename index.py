@@ -119,9 +119,7 @@ def caraccident():
         _email = request.form['email'] 
         _lat = request.form['lat']
         _long = request.form['lng']
-        _acc = request.form['acc']
-        
-        _time = datetime.datetime.utcnow()
+        _acc = request.form['acc']       
 
         cursor = conn.cursor()
 
@@ -131,12 +129,12 @@ def caraccident():
         
         app.logger.info(result)
         
-        cursor.execute("INSERT INTO car_accidents (accidentTime,latitude,longitude,acceleration,mobile_app_users_userID) values (%s,%s,%s,%s,%s)", (_time, _lat, _long, _acc, _email,_userID))
+        cursor.execute("INSERT INTO simpleRunningAccidents (accidentTime,location,mobileAppUserId) values (GETDATE(),POINT(%s,%s),%s)", (_lat, _long, _userID))
         conn.commit()
         return jsonify({"success":"accident posted"})
-    except KeyError:
+    except Exception,e:
         app.logger.warn('accident post failed')
-        return jsonify({"error":"accident post failed"})
+        return jsonify({"error":"accident post failed"},str(e))
 
 
 @app.route('/accident', methods=['POST']) #data is submitted
