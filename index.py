@@ -52,11 +52,11 @@ def login():
             app.logger.info(result)
             if result:
                 # jsonify returns a response
-                if check_password(result[2],_password):
+                if check_password(result[3],_password):
                     output = jsonify({
                         "auth":"success",
                         "message":"login successful",
-                        "username": result[3],
+                        "username": result[2],
                         "id": result[0]
                         })
                 else:
