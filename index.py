@@ -50,26 +50,38 @@ def login():
             result = cursor.fetchone()
 
             app.logger.info(result)
-            
             if result:
                 # jsonify returns a response
                 if check_password(result[2],_password):
-                    response = jsonify({"success":"login successful","username": result[3],"id": result[0]})
+                    output = jsonify({
+                        "auth":"success",
+                        "message":"login successful",
+                        "username": result[3],
+                        "id": result[0]
+                        })
                 else:
-                    response = jsonify({"error":"login unsuccessful"})
+                    output= jsonify({
+                        "auth":"fail",
+                        "message":"login unsuccessful"
+                        })
             else:
-                response = jsonify({"error":"login unsuccessful"})
-
-
+                output = jsonify({
+                    "auth":"fail",
+                    "message":"login unsuccessful"
+                    })
         else:
-            response = jsonify({"error":"parameters cannot be empty"})
-            
-        return response
+            output = jsonify({
+                "auth":"fail",
+                "message":"parameters cannot be empty"
+                })
+        return output
 
         cursor.close()
     except KeyError:
         app.logger.warn('The data was malformed')
-        return jsonify({"error":"parameters cannot be empty"})
+        return jsonify({
+            "auth":"fail",
+            "message":"parameters cannot be empty"})
 
 @app.route('/register', methods=['POST']) #data is submitted
 def register():
@@ -88,9 +100,14 @@ def register():
             conn.commit()
             id = cursor.lastrowid
             if id:
-                return jsonify({"success":"registration confirmed","username": username, "id": id})
+                return jsonify({
+                    "auth":"success",
+                    "message":"registration confirmed",
+                    "username": username, 
+                    "id": id
+                    })
         else:
-            return jsonify({"error":"passwords do not match"})
+            return jsonify({"auth":"fail", "message" : "passwords do not match"})
     except KeyError:
         app.logger.warn('invalid inputs')
         return jsonify({"error":"invalid inputs"})
