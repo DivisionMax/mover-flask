@@ -110,7 +110,9 @@ def register():
             return jsonify({"auth":"fail", "message" : "passwords do not match"})
     except KeyError:
         app.logger.warn('invalid inputs')
-        return jsonify({"error":"invalid inputs"})
+        return jsonify({
+            "auth":"fail",
+            "message":"invalid inputs"})
 
 
 @app.route('/car-accident', methods=['POST']) #data is submitted
@@ -132,7 +134,7 @@ def caraccident():
         cursor.execute("INSERT INTO simpleRunningAccidents (accidentTime,location,mobileAppUserId) values (GETDATE(),POINT(%s,%s),%s)", (_lat, _long, _userID))
         conn.commit()
         return jsonify({"success":"accident posted"})
-    except Exception,e:
+    except Exception as e:
         app.logger.warn('accident post failed')
         return jsonify({"error":"accident post failed"},str(e))
 
@@ -157,14 +159,23 @@ def accident():
                 # stored passwords must be hashed
                 cursor.execute("INSERT INTO simplerunningaccidents (accidentTime,location,mobileAppUserId) values (%s,point(%s,%s),%s)", (_timeOfAccident, _longitude,_latitude, _userId))
                 conn.commit()
-                return jsonify({"success":"accident added"})
+                return jsonify({
+                    "result":"success",
+                    "message":"accident added"})
             else:
-                return jsonify({"error":"no accident added"})
+                return jsonify({
+                    "result":"fail",
+                    "message":"no accident added"})
         else:
-            return jsonify({"error":"invalid inputs"})
+            return jsonify({
+                "result":"fail",
+                "message":"invalid inputs"
+                })
     except KeyError:
-        app.logger.warn('invalid inputs')
-        return jsonify({"error":"invalid inputs"})
+        return jsonify({
+            "result":"fail",
+            "message":"invalid inputs"
+            })
 
 if __name__ == "__main__":
     #app.run() #local
