@@ -91,55 +91,36 @@ def register():
         username = _email.rsplit('@', 1)[0]
         _password = request.form['password']
         _passwordConfirm = request.form['password_confirm']
-        
-        if _password == _passwordConfirm:
-            cursor = conn.cursor()
-            # need to check they don't exist beforehand.
-            
-            # stored passwords must be hashed
-            password_hash = hash_password(_password)
-            cursor.execute("INSERT INTO mobile_app_users (emailAddress,password,username) values (%s,%s,%s)", (_email, password_hash, username))
-            conn.commit()
-            id = cursor.lastrowid
-            if id:
-                return jsonify({
-                    "auth":"success",
-                    "message":"registration confirmed",
-                    "username": username, 
-                    "id": id
-                    })
+
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM mobile_app_users WHERE emailAddress = %s", (_email,))
+        result = cursor.fetchone()
+
+        if result is None:
+            if _password == _passwordConfirm:
+                # need to check they don't exist beforehand.
+                # stored passwords must be hashed
+                password_hash = hash_password(_password)
+                cursor.execute("INSERT INTO mobile_app_users (emailAddress,password,username) values (%s,%s,%s)", (_email, password_hash, username))
+                conn.commit()
+                id = cursor.lastrowid
+                if id:
+                    return jsonify({
+                        "auth":"success",
+                        "message":"registration confirmed",
+                        "username": username, 
+                        "id": id
+                        })
+            else:
+                return jsonify({"auth":"fail", "message" : "passwords do not match"})
         else:
-            return jsonify({"auth":"fail", "message" : "passwords do not match"})
+                return jsonify({"auth":"fail", "message" : "please use another email"})
+
     except KeyError:
         app.logger.warn('invalid inputs')
         return jsonify({
             "auth":"fail",
             "message":"invalid inputs"})
-
-
-@app.route('/car-accident', methods=['POST']) #data is submitted
-def caraccident():
-    try:        
-        _email = request.form['email'] 
-        _lat = request.form['lat']
-        _long = request.form['lng']
-        _acc = request.form['acc']       
-
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT userID FROM web_app_users WHERE emailAddress = %s", (_email,))
-            
-        _userID = result = cursor.fetchone()
-        
-        app.logger.info(result)
-        
-        cursor.execute("INSERT INTO simpleRunningAccidents (accidentTime,location,mobileAppUserId) values (GETDATE(),POINT(%s,%s),%s)", (_lat, _long, _userID))
-        conn.commit()
-        return jsonify({"success":"accident posted"})
-    except Exception as e:
-        app.logger.warn('accident post failed')
-        return jsonify({"error":"accident post failed"},str(e))
-
 
 @app.route('/accident', methods=['POST']) #data is submitted
 def accident():
@@ -158,6 +139,8 @@ def accident():
             if _type == 'runner' or _type == 'car':
                 # runner accident
                 cursor = conn.cursor()
+                # cursor.execute("SELECT userID FROM web_app_users WHERE emailAddress = %s", (_email,))
+                # _userID = result = cursor.fetchone()
                 # unix timestamp is more robust than handling specific string formats
                 cursor.execute("INSERT INTO simplerunningaccidents (accidentTime,location,mobileAppUserId) values (from_unixtime(%s),point(%s,%s),%s)", (_timeOfAccidentTimestamp, _longitude,_latitude, _userId))
                 conn.commit()
