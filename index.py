@@ -154,18 +154,17 @@ def accident():
         app.logger.info('Time of Accident: %s', (_timeOfAccidentTimestamp,))
         
         if _type and _longitude and _latitude and _timeOfAccidentTimestamp and _userId:
-            # date_object = datetime.strptime(_timeOfAccident, '%b %d %Y %I:%M%p')
-
-            if _type == 'runner':
+            # there should actually be a different statement for car 
+            if _type == 'runner' or _type == 'car':
                 # runner accident
                 cursor = conn.cursor()
-                # stored passwords must be hashed
                 # unix timestamp is more robust than handling specific string formats
                 cursor.execute("INSERT INTO simplerunningaccidents (accidentTime,location,mobileAppUserId) values (from_unixtime(%s),point(%s,%s),%s)", (_timeOfAccidentTimestamp, _longitude,_latitude, _userId))
                 conn.commit()
                 return jsonify({
                     "result":"success",
                     "message":"accident added"})
+
             else:
                 return jsonify({
                     "result":"fail",
