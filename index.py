@@ -94,6 +94,8 @@ def register():
         
         if _password == _passwordConfirm:
             cursor = conn.cursor()
+            # need to check they don't exist beforehand.
+            
             # stored passwords must be hashed
             password_hash = hash_password(_password)
             cursor.execute("INSERT INTO mobile_app_users (emailAddress,password,username) values (%s,%s,%s)", (_email, password_hash, username))
@@ -146,18 +148,20 @@ def accident():
         _type = request.form['type']
         _longitude = request.form['longitude']
         _latitude = request.form['latitude']
-        _timeOfAccident = request.form['time-of-accident']
+        _timeOfAccidentTimestamp = request.form['time-of-accident']
         _userId = request.form['userId']
-        app.logger.info('Time of Accident: %s', (_timeOfAccident,))
+
+        app.logger.info('Time of Accident: %s', (_timeOfAccidentTimestamp,))
         
-        if _type and _longitude and _latitude and _timeOfAccident and _userId:
+        if _type and _longitude and _latitude and _timeOfAccidentTimestamp and _userId:
             # date_object = datetime.strptime(_timeOfAccident, '%b %d %Y %I:%M%p')
 
             if _type == 'runner':
                 # runner accident
                 cursor = conn.cursor()
                 # stored passwords must be hashed
-                cursor.execute("INSERT INTO simplerunningaccidents (accidentTime,location,mobileAppUserId) values (%s,point(%s,%s),%s)", (_timeOfAccident, _longitude,_latitude, _userId))
+                # unix timestamp is more robust than handling specific string formats
+                cursor.execute("INSERT INTO simplerunningaccidents (accidentTime,location,mobileAppUserId) values (from_unixtime(%s),point(%s,%s),%s)", (_timeOfAccidentTimestamp, _longitude,_latitude, _userId))
                 conn.commit()
                 return jsonify({
                     "result":"success",
