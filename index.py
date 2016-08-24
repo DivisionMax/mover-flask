@@ -122,6 +122,67 @@ def register():
             "auth":"fail",
             "message":"invalid inputs"})
 
+@app.route('/accidents', methods=['GET']) #data is submitted
+def getAccidents():
+    try:
+
+        _userId = request.args.get('userId')
+        _type = request.args.get('type')
+        
+        if _userId and _type:
+
+            if _type == 'runner' or _type == 'car':
+
+                cursor = conn.cursor()
+                # parametized - prevent SQL injection
+                cursor.execute("SELECT accidentId as id, accidentTime as time,X(location) as x, Y(location) as y  FROM simplerunningaccidents WHERE mobileAppUserId = %s", (_userId,))
+                
+                results = cursor.fetchall()
+
+                if results:
+                    data = []
+                    app.logger.info(results)
+                    # jsonify returns a response
+                    for row in results:
+                        app.logger.info(row)
+                        #data will be a list of lists
+                        data.append(
+                            {"id": row[0],
+                            "datetime": row[1],
+                            "latitude": row[2],
+                            "longitude": row[3]
+                        }) # or simply data.append(list(row))
+                        app.logger.info(data)
+
+                    output = jsonify({
+                        "results":data
+                        })
+                else:
+                    output= jsonify({
+                            "results":[]                            
+                            })
+                cursor.close()
+            else:
+                return jsonify({
+                    "result":"fail",
+                    "message":"no accident added"})
+
+            
+        else:
+            output = jsonify({
+                "auth":"fail",
+                "message":"parameters cannot be empty"
+                })
+
+        return output
+        
+
+    except KeyError:
+        return jsonify({
+            "result":"fail",
+            "message":"invalid inputs"
+            })
+
 @app.route('/accident', methods=['POST']) #data is submitted
 def accident():
     try:
