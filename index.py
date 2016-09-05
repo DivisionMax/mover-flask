@@ -196,14 +196,24 @@ def accident():
         app.logger.info('Time of Accident: %s', (_timeOfAccidentTimestamp,))
         
         if _type and _longitude and _latitude and _timeOfAccidentTimestamp and _userId:
-            # there should actually be a different statement for car 
-            if _type == 'runner' or _type == 'car':
+            if _type == 'runner'
                 # runner accident
                 cursor = conn.cursor()
                 # cursor.execute("SELECT userID FROM web_app_users WHERE emailAddress = %s", (_email,))
                 # _userID = result = cursor.fetchone()
                 # unix timestamp is more robust than handling specific string formats
-                cursor.execute("INSERT INTO simplerunningaccidents (accidentTime,location,mobileAppUserId) values (from_unixtime(%s),point(%s,%s),%s)", (_timeOfAccidentTimestamp, _longitude,_latitude, _userId))
+                cursor.execute("INSERT INTO simpleRunningAccidents (accidentTime,location,mobileAppUserId) values (from_unixtime(%s),point(%s,%s),%s)", (_timeOfAccidentTimestamp, _longitude,_latitude, _userId))
+                conn.commit()
+                return jsonify({
+                    "result":"success",
+                    "message":"accident added"})
+             else if _type == 'car':
+                # car accident
+                cursor = conn.cursor()
+                # cursor.execute("SELECT userID FROM web_app_users WHERE emailAddress = %s", (_email,))
+                # _userID = result = cursor.fetchone()
+                # unix timestamp is more robust than handling specific string formats
+                cursor.execute("INSERT INTO simpleRunningAccidents (accidentTime,location,mobileAppUserId) values (from_unixtime(%s),point(%s,%s),%s)", (_timeOfAccidentTimestamp, _longitude,_latitude, _userId))
                 conn.commit()
                 return jsonify({
                     "result":"success",
