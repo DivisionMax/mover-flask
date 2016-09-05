@@ -196,7 +196,7 @@ def accident():
         app.logger.info('Time of Accident: %s', (_timeOfAccidentTimestamp,))
         
         if _type and _longitude and _latitude and _timeOfAccidentTimestamp and _userId:
-            if _type == 'runner'
+            if _type == 'runner':
                 # runner accident
                 cursor = conn.cursor()
                 # cursor.execute("SELECT userID FROM web_app_users WHERE emailAddress = %s", (_email,))
