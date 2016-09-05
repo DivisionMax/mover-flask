@@ -207,7 +207,7 @@ def accident():
                 return jsonify({
                     "result":"success",
                     "message":"accident added"})
-            else if _type == 'car':
+            elif _type == 'car':
                 # car accident
                 cursor = conn.cursor()
                 # cursor.execute("SELECT userID FROM web_app_users WHERE emailAddress = %s", (_email,))
