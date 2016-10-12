@@ -213,7 +213,7 @@ def accident():
                 # cursor.execute("SELECT userID FROM web_app_users WHERE emailAddress = %s", (_email,))
                 # _userID = result = cursor.fetchone()
                 # unix timestamp is more robust than handling specific string formats
-                cursor.execute("INSERT INTO car_accidents (accidentTime,latitude, longitude, acceleration,mobile_app_users_userId) values (from_unixtime(%s),%s,%s,20.0,%s)", (_timeOfAccidentTimestamp, _longitude,_latitude, _userId))
+                cursor.execute("INSERT INTO car_accidents (accidentTime,latitude, longitude, acceleration,mobile_app_users_userId) values (from_unixtime(%s),%s,%s,20.0,%s)", (_timeOfAccidentTimestamp, _latitude, _longitude, _userId))
                 conn.commit()
                 return jsonify({
                     "result":"success",
